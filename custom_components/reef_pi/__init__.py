@@ -150,6 +150,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
         )
 
     async def update_capabilities(self):
+        """Fetch supported features from Reef Pi and store flags."""
         _LOGGER.debug("Fetching capabilities")
 
         def get_capability(name):
@@ -169,6 +170,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.debug("Capabilities: ok")
 
     async def update_info(self):
+        """Fetch controller metadata and basic status."""
         _LOGGER.debug("Fetching info")
         info = await self.api.info()
         if info:
@@ -180,6 +182,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.debug("Info: ok")
 
     async def update_temperature(self):
+        """Update all temperature sensor readings."""
         if self.has_temperature:
             _LOGGER.debug("Fetching temperature")
             sensors = await self.api.temperature_sensors()
@@ -198,6 +201,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                 self.tcs = all_tcs
 
     async def update_equipment(self):
+        """Update equipment state and attributes."""
         if self.has_equipment:
             _LOGGER.debug("Fetching equipment")
             equipment = await self.api.equipment()
@@ -213,6 +217,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                 self.equipment = all_equipment
 
     async def update_timers(self):
+        """Refresh timer configurations."""
         if self.has_timers:
             _LOGGER.debug("Fetching timers")
             timers = await self.api.timers()
@@ -228,6 +233,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                 self.timers = all_timers
 
     async def update_macros(self):
+        """Refresh available macros for script buttons."""
         if self.has_macro:
             _LOGGER.debug("Fetching macros")
             macros = await self.api.macros()
@@ -242,6 +248,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                 self.macros = all_macros
 
     async def update_ph(self):
+        """Retrieve pH probe readings."""
         if self.has_ph:
             _LOGGER.debug("Fetching phprobes")
             probes = await self.api.phprobes()
@@ -259,6 +266,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                 _LOGGER.debug(f"Got {len(all_ph)} pH probes: {all_ph}")
 
     async def update_lights(self):
+        """Update manual light channel values."""
         if self.has_lights:
             _LOGGER.debug("Fetching lights")
             lights = await self.api.lights()
@@ -285,6 +293,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                 self.lights = all_light
 
     async def update_inlets(self):
+        """Read current inlet sensor states."""
         if self.has_ato:
             _LOGGER.debug("Fetching inlets")
             inlets = await self.api.inlets()
@@ -307,6 +316,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                 self.inlets = all_inlet
 
     async def update_pumps(self):
+        """Fetch dosing pump schedules and last runs."""
         if self.has_pumps:
             _LOGGER.debug("Fetching pumps")
             result = {}
@@ -341,6 +351,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
             self.pumps = result
 
     async def update_atos(self):
+        """Update ATO configuration and last run details."""
         if self.has_ato:
             atos = await self.api.atos()
             atos = {a["id"]: a for a in atos}
@@ -390,10 +401,12 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
         return {}
 
     async def equipment_control(self, id, state):
+        """Toggle an equipment switch."""
         await self.api.equipment_control(id, state)
         self.equipment[id]["state"] = state
 
     async def light_control(self, id, value):
+        """Set manual channel value for a light."""
         await self.api.light_update(
             self.lights[id]["light_id"], self.lights[id]["channel_id"], value
         )
@@ -404,12 +417,15 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
             self.lights[id]["state"] = False
 
     async def ato_update(self, id, enable):
+        """Enable or disable an ATO pump."""
         await self.api.ato_update(id, enable)
         self.ato[id]["enable"] = enable
 
     async def run_script(self, id):
+        """Execute a configured macro by id."""
         await self.api.run_macro(id)
 
     async def timer_control(self, id, state):
+        """Toggle a timer on or off."""
         await self.api.timer_control(id, state)
         self.timers[id]["state"] = state

@@ -46,6 +46,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
 
 class ReefPiBasicInfo(CoordinatorEntity, SensorEntity):
+    """Report general Reef Pi information such as CPU temperature."""
+
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
 
     def __init__(self, coordinator):
@@ -87,6 +89,8 @@ class ReefPiBasicInfo(CoordinatorEntity, SensorEntity):
 
 
 class ReefPiTemperature(CoordinatorEntity, SensorEntity):
+    """Representation of a temperature probe from Reef Pi."""
+
     def __init__(self, id, name, coordinator):
         """Initialize the sensor."""
         super().__init__(coordinator)
@@ -135,6 +139,8 @@ class ReefPiTemperature(CoordinatorEntity, SensorEntity):
 
 
 class ReefPiPh(CoordinatorEntity, SensorEntity):
+    """Expose pH readings from a Reef Pi probe."""
+
     def __init__(self, id, name, coordinator):
         """Initialize the sensor."""
         super().__init__(coordinator)
@@ -177,6 +183,8 @@ class ReefPiPh(CoordinatorEntity, SensorEntity):
 
 
 class ReefPiPump(CoordinatorEntity, SensorEntity):
+    """Track dosing pump runs."""
+
     def __init__(self, id, name, coordinator):
         """Initialize the sensor."""
         super().__init__(coordinator)
@@ -226,6 +234,8 @@ class ReefPiPump(CoordinatorEntity, SensorEntity):
 
 
 class ReefPiATO(CoordinatorEntity, SensorEntity):
+    """Represent the ATO state and pump duration."""
+
     def __init__(self, id, name, show_pump, coordinator):
         """Initialize the sensor."""
         super().__init__(coordinator)
