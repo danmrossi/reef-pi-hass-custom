@@ -520,7 +520,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
             while True:
                 label = f"pH {expected:g}"
                 message = (
-                    f"Place the probe in {label} solution and wait"
+                    f"Place the probe in {label} solution and wait for"
                     f" {PH_CALIBRATION_DELAY // 60} minutes."
                 )
                 await notify.async_create(
