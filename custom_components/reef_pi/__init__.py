@@ -510,7 +510,10 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
         await self.api.ph_probe_calibrate_point(probe_id, expected, observed, type_)
 
     async def calibrate_ph_probe_two_point(self, probe_id: int, mode: str):
-        """Run a two point pH probe calibration with user prompts."""
+        """Run a two point pH probe calibration with user prompts.
+
+        Returns ``True`` once the calibration completes.
+        """
         low, high = PH_CALIBRATION_MODES.get(mode, PH_CALIBRATION_MODES["freshwater"])
         steps = [
             ("low", low),
@@ -591,6 +594,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
         if inspect.isawaitable(maybe_coro):
             await maybe_coro
         await self.async_request_refresh()
+        return True
 
     async def timer_control(self, id, state):
         await self.api.timer_control(id, state)

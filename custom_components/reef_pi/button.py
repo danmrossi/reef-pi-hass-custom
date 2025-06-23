@@ -4,9 +4,11 @@ from __future__ import annotations
 from homeassistant.components.button import (
     ButtonEntity,
 )
+import logging
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-
 from .const import DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
@@ -139,4 +141,12 @@ class ReefPiPhCalibrationButton(CoordinatorEntity, ButtonEntity):
         return self._probe_id in self.api.ph.keys()
 
     async def async_press(self) -> None:
-        await self.api.calibrate_ph_probe_two_point(self._probe_id, self._mode)
+        calibration = await self.api.calibrate_ph_probe_two_point(
+            self._probe_id, self._mode
+        )
+        _LOGGER.debug(
+            "pH probe %s calibrated (mode=%s): %s",
+            self._probe_id,
+            self._mode,
+            calibration,
+        )
