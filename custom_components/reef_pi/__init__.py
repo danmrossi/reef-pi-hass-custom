@@ -41,6 +41,13 @@ PLATFORMS = ["sensor", "switch", "light", "binary_sensor", "button"]
 REEFPI_DATETIME_FORMAT = "%b-%d-%H:%M, %Y"
 
 
+async def _maybe_call(func, *args, **kwargs):
+    """Call a potentially synchronous or asynchronous function."""
+    result = func(*args, **kwargs)
+    if inspect.isawaitable(result):
+        await result
+
+
 CONFIG_SCHEMA = vol.Schema({DOMAIN: CONFIG_OPTIONS}, extra=vol.ALLOW_EXTRA)
 
 
@@ -524,21 +531,13 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                     f"Place the probe in {label} solution and wait"
                     f" {PH_CALIBRATION_DELAY // 60} minutes."
                 )
-                create = persistent_notification.async_create
-                if inspect.iscoroutinefunction(create):
-                    await create(
-                        self.hass,
-                        message,
-                        title="Reef-Pi Calibration",
-                        notification_id=f"reef_pi_calibration_{probe_id}",
-                    )
-                else:
-                    create(
-                        self.hass,
-                        message,
-                        title="Reef-Pi Calibration",
-                        notification_id=f"reef_pi_calibration_{probe_id}",
-                    )
+                await _maybe_call(
+                    persistent_notification.async_create,
+                    self.hass,
+                    message,
+                    title="Reef-Pi Calibration",
+                    notification_id=f"reef_pi_calibration_{probe_id}",
+                )
 
                 end = datetime.now(UTC) + timedelta(seconds=PH_CALIBRATION_DELAY)
                 if probe_id not in self.ph:
@@ -561,21 +560,13 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                 reading = await self.api.ph(probe_id)
                 value = reading.get("value")
                 if value is None or value < 0:
-                    create = persistent_notification.async_create
-                    if inspect.iscoroutinefunction(create):
-                        await create(
-                            self.hass,
-                            "Invalid reading detected, restarting step.",
-                            title="Reef-Pi Calibration",
-                            notification_id=f"reef_pi_calibration_{probe_id}",
-                        )
-                    else:
-                        create(
-                            self.hass,
-                            "Invalid reading detected, restarting step.",
-                            title="Reef-Pi Calibration",
-                            notification_id=f"reef_pi_calibration_{probe_id}",
-                        )
+                    await _maybe_call(
+                        persistent_notification.async_create,
+                        self.hass,
+                        "Invalid reading detected, restarting step.",
+                        title="Reef-Pi Calibration",
+                        notification_id=f"reef_pi_calibration_{probe_id}",
+                    )
                     continue
 
                 await self.api.ph_probe_calibrate_point(
@@ -593,21 +584,13 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                 "last_calibration": datetime.now(UTC).strftime("%m/%y"),
             }
         )
-        create = persistent_notification.async_create
-        if inspect.iscoroutinefunction(create):
-            await create(
-                self.hass,
-                "Two point calibration complete.",
-                title="Reef-Pi Calibration",
-                notification_id=f"reef_pi_calibration_{probe_id}",
-            )
-        else:
-            create(
-                self.hass,
-                "Two point calibration complete.",
-                title="Reef-Pi Calibration",
-                notification_id=f"reef_pi_calibration_{probe_id}",
-            )
+        await _maybe_call(
+            persistent_notification.async_create,
+            self.hass,
+            "Two point calibration complete.",
+            title="Reef-Pi Calibration",
+            notification_id=f"reef_pi_calibration_{probe_id}",
+        )
         await self.async_request_refresh()
 
     async def timer_control(self, id, state):
