@@ -532,7 +532,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                     notification_id=f"reef_pi_calibration_{probe_id}",
                 )
                 if inspect.isawaitable(maybe_coro):
-                    await maybe_coro
+                    self.hass.async_create_task(maybe_coro)
 
                 end = datetime.now(UTC) + timedelta(seconds=PH_CALIBRATION_DELAY)
                 if probe_id not in self.ph:
@@ -563,7 +563,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
                         notification_id=f"reef_pi_calibration_{probe_id}",
                     )
                     if inspect.isawaitable(maybe_coro):
-                        await maybe_coro
+                        self.hass.async_create_task(maybe_coro)
                     continue
 
                 await self.api.ph_probe_calibrate_point(
@@ -589,7 +589,7 @@ class ReefPiDataUpdateCoordinator(DataUpdateCoordinator):
             notification_id=f"reef_pi_calibration_{probe_id}",
         )
         if inspect.isawaitable(maybe_coro):
-            await maybe_coro
+            self.hass.async_create_task(maybe_coro)
         await self.async_request_refresh()
 
     async def timer_control(self, id, state):
